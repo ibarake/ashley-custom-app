@@ -8,6 +8,9 @@ import shopify from "./shopify.js";
 import productCreator from "./product-creator.js";
 import GDPRWebhookHandlers from "./gdpr.js";
 
+import { GetFirstTenSubCategories } from "./queries/GetFirstTenSubCategories.js";
+import { GraphqlQueryError } from "@shopify/shopify-api";
+
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
 
 const STATIC_PATH =
@@ -63,5 +66,29 @@ app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res, _next) => {
     .set("Content-Type", "text/html")
     .send(readFileSync(join(STATIC_PATH, "index.html")));
 });
+
+//GETTING METAOBJECTS DATA
+
+app.post(
+  "https://issaworkshop.myshopify.com/admin/api/2023-01/graphql.json",
+  async (req, res) => {
+    try {
+      const session = res.locals.shopify.session;
+      const client = new shopify.api.clients.Graphql({ session });
+      const response = await client.query({ data: GetFirstTenSubCategories });
+
+      console.log(response);
+      res.status(200).send(response);
+    } catch (error) {
+      if (error instanceof GraphqlQueryError) {
+        throw new Error(
+          `${error.message}\n${JSON.stringify(error.response, null, 2)}`
+        );
+      } else {
+        throw error;
+      }
+    }
+  }
+);
 
 app.listen(PORT);

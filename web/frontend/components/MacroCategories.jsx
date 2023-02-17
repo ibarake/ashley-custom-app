@@ -1,5 +1,7 @@
 import React from "react";
 import { Card, DataTable } from "@shopify/polaris";
+import { useAuthenticatedFetch } from "../hooks";
+import { GraphqlQueryError } from "@shopify/shopify-api";
 
 const products = [
   {
@@ -29,6 +31,27 @@ export function MacroCategories() {
   ]);
 
   const headings = ["ID", "Title", "Price", "Inventory", "Tags"];
+
+  const fetch = useAuthenticatedFetch();
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch(
+        "https://issaworkshop.myshopify.com/admin/api/2023-01/graphql.json"
+      );
+      console.log(await response);
+    } catch (error) {
+      if (error instanceof GraphqlQueryError) {
+        throw new Error(
+          `${error.message}\n${JSON.stringify(error.response, null, 2)}`
+        );
+      } else {
+        throw error;
+      }
+    }
+  };
+
+  fetchData();
 
   return (
     <Card>

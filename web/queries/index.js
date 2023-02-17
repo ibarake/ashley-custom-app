@@ -1,4 +1,2 @@
-export {
-  GetFirstTwoMacroCategories,
-  GetFirstTenSubCategories,
-} from "./MetaObjectQueries";
+export { GetFirstTwoMacroCategories } from "./GetFirstTwoMacroCategories";
+export { GetFirstTenSubCategories } from "./GetFirstTenSubCategories";
