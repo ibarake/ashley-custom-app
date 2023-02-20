@@ -7,7 +7,6 @@ export default async function metaobjectsRetriever(session) {
 
   try {
     const response = await client.query({ data: GetFirstTenSubCategories });
-    console.log(response);
     return response;
   } catch (error) {
     if (error instanceof GraphqlQueryError) {

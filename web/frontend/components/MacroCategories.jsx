@@ -1,9 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, DataTable, Button } from "@shopify/polaris";
 import { useAppQuery } from "../hooks";
 
 export const MacroCategories = () => {
   const [isLoading, setIsLoading] = useState();
+
+  const {
+    data: { body: { data: { metaobjects: { edges } = {} } = {} } = {} } = {},
+    isLoading: isLoadingTrue,
+  } = useAppQuery({
+    url: "/api/metaobjects",
+    reactQueryOptions: {
+      onSucess: () => {
+        setData(edges);
+        setIsLoading(true);
+      },
+    },
+  });
+  console.log(edges);
+
+  const rows = edges
+    ? edges.map((macroCategory) => [
+        macroCategory.node.id.split("/")[4],
+        macroCategory.node.displayName,
+        macroCategory.node.fields[2].value.split(",").length,
+        "TODO: pull product counts from each collection inside this metaobject",
+        macroCategory.node.fields[3].value,
+      ])
+    : [];
 
   const headings = [
     "ID",
@@ -13,44 +37,17 @@ export const MacroCategories = () => {
     "Description",
   ];
 
-  const {
-    data: {
-      body: {
-        data: {
-          metaobjects: { edges },
-        },
-      },
-    },
-    isLoading: isLoadingTrue,
-  } = useAppQuery({
-    url: "/api/metaobjects",
-    reactQueryOptions: {
-      onSucess: () => {
-        setIsLoading(true);
-      },
-    },
-  });
-  console.log(edges);
-  const rows = edges.map((macroCategory) => [
-    macroCategory.node.id.split("/")[4],
-    macroCategory.node.displayName,
-    macroCategory.node.fields[2].value.split(",").length,
-    "TODO: pull product counts from each collection inside this metaobject",
-    macroCategory.node.fields[3].value,
-  ]);
-
   return (
     <Card>
-      {isLoadingTrue ? (
+      {isLoading ? (
         <p>"Loading..."</p>
       ) : (
         <DataTable
-          columnContentTypes={["text", "text", "text", "numeric", "text"]}
+          columnContentTypes={["text", "text", "text", "text", "text"]}
           headings={headings}
           rows={rows}
         />
       )}
-      <Button>Fetch</Button>
     </Card>
   );
 };
