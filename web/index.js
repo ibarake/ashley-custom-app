@@ -7,7 +7,7 @@ import serveStatic from "serve-static";
 import shopify from "./shopify.js";
 import GDPRWebhookHandlers from "./gdpr.js";
 
-import { GetFirstTenSubCategories } from "./queries/GetFirstTenSubCategories.js";
+import mataobjectsRetriever from "./metaobjects.js";
 
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
 
@@ -37,15 +37,17 @@ app.use("/api/*", shopify.validateAuthenticatedSession());
 //GETTING METAOBJECTS DATA
 
 app.post("/api/metaobjects", async (_req, res) => {
+  let status = 200;
+  let error = null;
+
   try {
-    const session = res.locals.shopify.session;
-    const client = new shopify.api.clients.Graphql({ session });
-    const response = await client.query({ data: GetFirstTenSubCategories });
-    res.status(200).send(response);
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "An error occurred" });
+    await mataobjectsRetriever(res.locals.shopify.session);
+  } catch (e) {
+    console.log(`Failed to process: ${e.message}`);
+    status = 500;
+    error = e.message;
   }
+  res.status(status).send({ success: status === 200, error });
 });
 
 app.use(express.json());

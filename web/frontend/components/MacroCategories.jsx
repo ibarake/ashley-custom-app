@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, DataTable } from "@shopify/polaris";
+import { Card, DataTable, Button } from "@shopify/polaris";
 import { useAuthenticatedFetch } from "../hooks";
 
 const MacroCategoriesData = [
@@ -56,7 +56,7 @@ export function MacroCategories() {
         headings={headings}
         rows={rows}
       />
-      <button onClick={fetchData} value="Fetch" />
+      <Button onClick={fetchData}>Fetch</Button>
     </Card>
   );
 }
