@@ -1,57 +1,53 @@
 import React from "react";
 import { Card, DataTable } from "@shopify/polaris";
 import { useAuthenticatedFetch } from "../hooks";
-import { GraphqlQueryError } from "@shopify/shopify-api";
 
-const products = [
+const MacroCategoriesData = [
   {
     id: 1,
-    title: "Product 1",
-    price: "$10.00",
-    inventory: 5,
+    title: "macro 1",
+    total_subcategories: "9",
+    total_products: 100,
     tags: ["tag1", "tag2"],
   },
   {
     id: 2,
-    title: "Product 2",
-    price: "$20.00",
-    inventory: 10,
+    title: "macro 2",
+    total_subcategories: "8",
+    total_products: 100,
     tags: ["tag3", "tag4"],
   },
   // Add more products here
 ];
 
 export function MacroCategories() {
-  const rows = products.map((product) => [
-    product.id,
-    product.title,
-    product.price,
-    product.inventory,
-    product.tags.join(", "),
+  const rows = MacroCategoriesData.map((macroCategory) => [
+    macroCategory.id,
+    macroCategory.title,
+    macroCategory.total_subcategories,
+    macroCategory.total_products,
+    macroCategory.tags.join(", "),
   ]);
 
-  const headings = ["ID", "Title", "Price", "Inventory", "Tags"];
+  const headings = [
+    "ID",
+    "Title",
+    "Total Subcategories",
+    "Total Products",
+    "Tags",
+  ];
 
   const fetch = useAuthenticatedFetch();
 
   const fetchData = async () => {
     try {
-      const response = await fetch(
-        "https://issaworkshop.myshopify.com/admin/api/2023-01/graphql.json"
-      );
-      console.log(await response);
+      fetch("/api/metaobjects", {
+        method: "POST",
+      }).then((data) => console.log(data));
     } catch (error) {
-      if (error instanceof GraphqlQueryError) {
-        throw new Error(
-          `${error.message}\n${JSON.stringify(error.response, null, 2)}`
-        );
-      } else {
-        throw error;
-      }
+      console.log(error);
     }
   };
-
-  fetchData();
 
   return (
     <Card>
@@ -60,6 +56,7 @@ export function MacroCategories() {
         headings={headings}
         rows={rows}
       />
+      <button onClick={fetchData} value="Fetch" />
     </Card>
   );
 }
