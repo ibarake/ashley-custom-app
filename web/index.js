@@ -7,7 +7,7 @@ import serveStatic from "serve-static";
 import shopify from "./shopify.js";
 import GDPRWebhookHandlers from "./gdpr.js";
 
-import mataobjectsRetriever from "./metaobjects.js";
+import metaobjectsRetriever from "./metaobjects.js";
 
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
 
@@ -36,18 +36,38 @@ app.use("/api/*", shopify.validateAuthenticatedSession());
 
 //GETTING METAOBJECTS DATA
 
-app.post("/api/metaobjects", async (_req, res) => {
+app.get("/api/metaobjects", async (_req, res) => {
   let status = 200;
   let error = null;
-
   try {
-    await mataobjectsRetriever(res.locals.shopify.session);
+    const session = res.locals.shopify.session;
+    const response = await metaobjectsRetriever(session);
+    res.status(status).send(response);
   } catch (e) {
     console.log(`Failed to process: ${e.message}`);
     status = 500;
     error = e.message;
+
+    res.status(status).send(error);
   }
-  res.status(status).send({ success: status === 200, error });
+});
+
+app.get("/api/productcount", async (_req, res) => {
+  let status = 200;
+  let error = null;
+  try {
+    const session = res.locals.shopify.session;
+    const response = await shopify.api.rest.Product.count({
+      session: session,
+    });
+    res.status(status).send(response);
+  } catch (e) {
+    console.log(`Failed to process: ${e.message}`);
+    status = 500;
+    error = e.message;
+
+    res.status(status).send(error);
+  }
 });
 
 app.use(express.json());

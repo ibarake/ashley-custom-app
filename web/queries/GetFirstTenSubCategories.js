@@ -1,4 +1,4 @@
-export const GetFirstTenSubCategories = `{
+export const GetFirstTenSubCategories = `query {
     metaobjects(type: "sub_categories", first: 10) {
       edges {
         node {
