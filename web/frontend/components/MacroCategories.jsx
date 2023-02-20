@@ -20,19 +20,25 @@ export const MacroCategories = () => {
   console.log(edges);
 
   const rows = edges
-    ? edges.map((macroCategory) => [
-        macroCategory.node.id.split("/")[4],
-        macroCategory.node.displayName,
-        macroCategory.node.fields[2].value.split(",").length,
-        "TODO: pull product counts from each collection inside this metaobject",
-        macroCategory.node.fields[3].value,
-      ])
+    ? edges.map((macroCategory) => {
+        const collectionIds = macroCategory.node.fields[2].value
+          .match(/gid:\/\/shopify\/Collection\/(\d+)/g)
+          .map((id) => "[" + id.split("/")[4] + "]")
+          .join(", ");
+        return [
+          macroCategory.node.id.split("/")[4],
+          macroCategory.node.displayName,
+          collectionIds,
+          "TODO: pull product counts from each collection inside this metaobject",
+          macroCategory.node.fields[3].value,
+        ];
+      })
     : [];
 
   const headings = [
     "ID",
     "Title",
-    "Total Subcategories",
+    "Subcategories",
     "Total Products",
     "Description",
   ];
