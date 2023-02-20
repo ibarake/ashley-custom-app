@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Card, DataTable, Button } from "@shopify/polaris";
 import { useAppQuery } from "../hooks";
 
-export const MacroCategories = () => {
+export const SubCategories = () => {
   const [isLoading, setIsLoading] = useState();
 
   const {
     data: { body: { data: { metaobjects: { edges } = {} } = {} } = {} } = {},
     isLoading: isLoadingTrue,
   } = useAppQuery({
-    url: "/api/metaobjects/macrocategories",
+    url: "/api/metaobjects/subcategories",
     reactQueryOptions: {
       onSucess: () => {
         setData(edges);
@@ -20,17 +20,17 @@ export const MacroCategories = () => {
   console.log(edges);
 
   const rows = edges
-    ? edges.map((macroCategory) => {
-        const collectionIds = macroCategory.node.fields[2].value
-          .match(/gid:\/\/shopify\/Metaobject\/(\d+)/g)
+    ? edges.map((subcategory) => {
+        const collectionIds = subcategory.node.fields[2].value
+          .match(/gid:\/\/shopify\/Collection\/(\d+)/g)
           .map((id) => "[" + id.split("/")[4] + "]")
           .join(", ");
         return [
-          macroCategory.node.id.split("/")[4],
-          macroCategory.node.displayName,
+          subcategory.node.id.split("/")[4],
+          subcategory.node.displayName,
           collectionIds,
           "TODO: pull product counts from each collection inside this metaobject",
-          macroCategory.node.fields[3].value,
+          subcategory.node.fields[3].value,
         ];
       })
     : [];
@@ -38,7 +38,7 @@ export const MacroCategories = () => {
   const headings = [
     "ID",
     "Title",
-    "Subcategories",
+    "Collections",
     "Total Products",
     "Description",
   ];
