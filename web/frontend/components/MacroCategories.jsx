@@ -1,23 +1,26 @@
-import React, { useState, useEffect } from "react";
-import { Card, DataTable, Button } from "@shopify/polaris";
+import React from "react";
+import { Card, DataTable } from "@shopify/polaris";
 import { useAppQuery } from "../hooks";
 
 export const MacroCategories = () => {
-  const [isLoading, setIsLoading] = useState();
-
   const {
     data: { body: { data: { metaobjects: { edges } = {} } = {} } = {} } = {},
     isLoading: isLoadingTrue,
   } = useAppQuery({
     url: "/api/metaobjects/macrocategories",
     reactQueryOptions: {
-      onSucess: () => {
-        setData(edges);
-        setIsLoading(true);
-      },
+      onSucess: () => {},
     },
   });
-  console.log(edges);
+
+  const { data } = useAppQuery({
+    url: "/api/pages/create",
+    reactQueryOptions: {
+      onSucess: () => {},
+    },
+  });
+
+  console.log(data);
 
   const rows = edges
     ? edges.map((macroCategory) => {
@@ -44,16 +47,18 @@ export const MacroCategories = () => {
   ];
 
   return (
-    <Card>
-      {isLoading ? (
-        <p>"Loading..."</p>
-      ) : (
-        <DataTable
-          columnContentTypes={["text", "text", "text", "text", "text"]}
-          headings={headings}
-          rows={rows}
-        />
-      )}
-    </Card>
+    <>
+      <Card>
+        {isLoadingTrue ? (
+          <p>Loading...</p>
+        ) : (
+          <DataTable
+            columnContentTypes={["text", "text", "text", "text", "text"]}
+            headings={headings}
+            rows={rows}
+          />
+        )}
+      </Card>
+    </>
   );
 };

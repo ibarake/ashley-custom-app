@@ -7,9 +7,10 @@ import serveStatic from "serve-static";
 import shopify from "./shopify.js";
 import GDPRWebhookHandlers from "./gdpr.js";
 
-import metaobjectsRetriever from "./metaobjects.js";
+import metaobjectsRetriever from "./metaobjectsRetriever.js";
+import metaobjectsPageCreator from "./metaobjectsPageCreator.js";
 import { GetFirstTenSubCategories } from "./queries/GetFirstTenSubCategories.js";
-import { GetFirstTwoMacroCategories } from "./queries/GetFirstTwoMacroCategories.js";
+import { GetFirstTenMacroCategories } from "./queries/GetFirstTenMacroCategories.js";
 
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
 
@@ -64,7 +65,7 @@ app.get("/api/metaobjects/macrocategories", async (_req, res) => {
     const session = res.locals.shopify.session;
     const response = await metaobjectsRetriever(
       session,
-      GetFirstTwoMacroCategories
+      GetFirstTenMacroCategories
     );
     res.status(status).send(response);
   } catch (e) {
@@ -76,20 +77,16 @@ app.get("/api/metaobjects/macrocategories", async (_req, res) => {
   }
 });
 
-app.get("/api/productcount", async (_req, res) => {
+app.get("/api/pages/create", async (_req, res) => {
   let status = 200;
   let error = null;
   try {
-    const session = res.locals.shopify.session;
-    const response = await shopify.api.rest.Product.count({
-      session: session,
-    });
+    const response = await metaobjectsPageCreator(res.locals.shopify.session);
     res.status(status).send(response);
   } catch (e) {
     console.log(`Failed to process: ${e.message}`);
     status = 500;
     error = e.message;
-
     res.status(status).send(error);
   }
 });
