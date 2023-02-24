@@ -8,9 +8,6 @@ export const SubCategories = () => {
     isLoading: isLoadingTrue,
   } = useAppQuery({
     url: "/api/metaobjects/subcategories",
-    reactQueryOptions: {
-      onSucess: () => {},
-    },
   });
 
   const rows = edges

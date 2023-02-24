@@ -11,6 +11,7 @@ import metaobjectsRetriever from "./metaobjectsRetriever.js";
 import metaobjectsPageCreator from "./metaobjectsPageCreator.js";
 import { GetFirstTenSubCategories } from "./queries/GetFirstTenSubCategories.js";
 import { GetFirstTenMacroCategories } from "./queries/GetFirstTenMacroCategories.js";
+import getPages from "./getPages.js";
 
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
 
@@ -77,12 +78,69 @@ app.get("/api/metaobjects/macrocategories", async (_req, res) => {
   }
 });
 
-app.get("/api/pages/create", async (_req, res) => {
+app.get("/api/pages/create", async (req, res) => {
   let status = 200;
   let error = null;
+
   try {
-    const response = await metaobjectsPageCreator(res.locals.shopify.session);
-    res.status(status).send(response);
+    const session = res.locals.shopify.session;
+    const pages = await getPages(session);
+    const macros = await metaobjectsRetriever(
+      session,
+      GetFirstTenMacroCategories
+    );
+    const subs = await metaobjectsRetriever(session, GetFirstTenSubCategories);
+
+    const subsData = subs.body.data.metaobjects.edges.map((e) => e.node);
+    const macroData = macros.body.data.metaobjects.edges.map((e) => e.node);
+
+    const pagesData = pages.map((e) => e.title);
+
+    macroData.forEach((macro) => {
+      const title = macro.displayName;
+      const id = macro.id;
+      const image = macro.fields[1].value;
+      const description = macro.fields[3].value;
+      const template = "macro-category";
+      const metafield = macro.id;
+      if (pagesData.find((e) => e === title)) {
+        console.log("Already created");
+      } else {
+        const response = metaobjectsPageCreator(
+          session,
+          title,
+          description,
+          template,
+          metafield
+        );
+        console.log("page created");
+      }
+    });
+
+    subsData.forEach((sub) => {
+      const title = sub.displayName;
+      const id = sub.id;
+      const image = sub.fields[1].value;
+      const description = sub.fields[3].value;
+      const template = "sub-category";
+      const metafield = sub.id;
+
+      if (pagesData.find((e) => e === title)) {
+        console.log("Already created");
+      } else {
+        const response = metaobjectsPageCreator(
+          session,
+          title,
+          description,
+          template,
+          metafield
+        );
+        console.log("page created");
+      }
+    });
+    console.log(response);
+    console.log("pages synced!");
+    res.status(status).send({ msg: "pages synced!" });
   } catch (e) {
     console.log(`Failed to process: ${e.message}`);
     status = 500;

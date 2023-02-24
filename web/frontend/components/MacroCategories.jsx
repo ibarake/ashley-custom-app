@@ -8,19 +8,7 @@ export const MacroCategories = () => {
     isLoading: isLoadingTrue,
   } = useAppQuery({
     url: "/api/metaobjects/macrocategories",
-    reactQueryOptions: {
-      onSucess: () => {},
-    },
   });
-
-  const { data } = useAppQuery({
-    url: "/api/pages/create",
-    reactQueryOptions: {
-      onSucess: () => {},
-    },
-  });
-
-  console.log(data);
 
   const rows = edges
     ? edges.map((macroCategory) => {
