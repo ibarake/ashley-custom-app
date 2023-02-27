@@ -1,23 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { Card, DataTable, Button } from "@shopify/polaris";
+import React from "react";
+import { Card, DataTable } from "@shopify/polaris";
 import { useAppQuery } from "../hooks";
 
 export const SubCategories = () => {
-  const [isLoading, setIsLoading] = useState();
-
   const {
     data: { body: { data: { metaobjects: { edges } = {} } = {} } = {} } = {},
     isLoading: isLoadingTrue,
   } = useAppQuery({
     url: "/api/metaobjects/subcategories",
-    reactQueryOptions: {
-      onSucess: () => {
-        setData(edges);
-        setIsLoading(true);
-      },
-    },
   });
-  console.log(edges);
 
   const rows = edges
     ? edges.map((subcategory) => {
@@ -45,8 +36,8 @@ export const SubCategories = () => {
 
   return (
     <Card>
-      {isLoading ? (
-        <p>"Loading..."</p>
+      {isLoadingTrue ? (
+        <p>Loading...</p>
       ) : (
         <DataTable
           columnContentTypes={["text", "text", "text", "text", "text"]}
