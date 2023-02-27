@@ -12,6 +12,7 @@ import metaobjectsPageCreator from "./metaobjectsPageCreator.js";
 import { GetFirstTenSubCategories } from "./queries/GetFirstTenSubCategories.js";
 import { GetFirstTenMacroCategories } from "./queries/GetFirstTenMacroCategories.js";
 import getPages from "./getPages.js";
+import { metaObjectUpdater } from "./metaObjectUpdater.js";
 
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
 
@@ -96,49 +97,84 @@ app.get("/api/pages/create", async (req, res) => {
 
     const pagesData = pages.map((e) => e.title);
 
-    macroData.forEach((macro) => {
+    // getting titles for all metapages
+    const metaPages = pages
+      .map((e) => {
+        if (
+          e.template_suffix === "macro-category" ||
+          e.template_suffix === "sub-category"
+        ) {
+          return e.title;
+        }
+      })
+      .filter((e) => e !== undefined);
+
+    // joining macro titles with subs titles in 1 array
+    const metaTitles = macroData
+      .map((e) => e.displayName)
+      .concat(subsData.map((e) => e.displayName));
+
+    console.log(metaPages);
+    console.log(metaTitles);
+
+    // remaining page that needs to be deleted
+    const remaining = metaPages.filter((value) => !metaTitles.includes(value));
+    const pageToDeleteObj = pages.find((e) => e.title === remaining[0])?.id;
+
+    console.log(remaining);
+    console.log(pageToDeleteObj);
+
+    if (pageToDeleteObj) {
+      await shopify.api.rest.Page.delete({
+        session: session,
+        id: pageToDeleteObj,
+      });
+      console.log("page deleted to sync!");
+    } else {
+      console.log("no pages deleted to sync");
+    }
+
+    //looping thru the macro categories and extracting the data to create a page based on the data
+    for (let i = 0; i < macroData.length; i++) {
+      const macro = macroData[i];
       const title = macro.displayName;
-      const id = macro.id;
-      const image = macro.fields[1].value;
-      const description = macro.fields[3].value;
       const template = "macro-category";
-      const metafield = macro.id;
+
       if (pagesData.find((e) => e === title)) {
         console.log("Already created");
       } else {
-        const response = metaobjectsPageCreator(
-          session,
-          title,
-          description,
-          template,
-          metafield
-        );
+        const response = await metaobjectsPageCreator(session, macro, template);
         console.log("page created");
-      }
-    });
 
-    subsData.forEach((sub) => {
+        try {
+          // linking the page created to the metaobject
+          metaObjectUpdater(session, macro, response);
+          console.log("meta objects page linked");
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    }
+    //looping thru the sub categories and extracting the data to create a page based on the data
+    for (let i = 0; i < subsData.length; i++) {
+      const sub = subsData[i];
       const title = sub.displayName;
-      const id = sub.id;
-      const image = sub.fields[1].value;
-      const description = sub.fields[3].value;
       const template = "sub-category";
-      const metafield = sub.id;
 
       if (pagesData.find((e) => e === title)) {
         console.log("Already created");
       } else {
-        const response = metaobjectsPageCreator(
-          session,
-          title,
-          description,
-          template,
-          metafield
-        );
+        const response = await metaobjectsPageCreator(session, sub, template);
         console.log("page created");
+        try {
+          // linking the page created to the metaobject
+          metaObjectUpdater(session, sub, response);
+          console.log("meta objects page linked");
+        } catch (error) {
+          console.log(error);
+        }
       }
-    });
-    console.log(response);
+    }
     console.log("pages synced!");
     res.status(status).send({ msg: "pages synced!" });
   } catch (e) {

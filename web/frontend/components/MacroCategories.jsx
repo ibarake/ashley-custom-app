@@ -9,7 +9,7 @@ export const MacroCategories = () => {
   } = useAppQuery({
     url: "/api/metaobjects/macrocategories",
   });
-
+  console.log(edges);
   const rows = edges
     ? edges.map((macroCategory) => {
         const collectionIds = macroCategory.node.fields[2].value

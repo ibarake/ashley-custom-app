@@ -1,22 +1,16 @@
 import { GraphqlQueryError } from "@shopify/shopify-api";
 import shopify from "./shopify.js";
 
-export default async function metaobjectsPageCreator(
-  session,
-  title,
-  description,
-  template,
-  metafield
-) {
+export default async function metaobjectsPageCreator(session, meta, template) {
   try {
     const page = new shopify.api.rest.Page({ session: session });
-    page.title = title;
-    page.body_html = description;
+    page.title = meta.displayName;
+    page.body_html = meta.fields[3].value;
     page.template_suffix = template;
     page.metafields = [
       {
         key: "reference",
-        value: metafield,
+        value: meta.id,
         type: "mixed_reference",
         namespace: "custom",
       },
