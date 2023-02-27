@@ -7,12 +7,12 @@ import serveStatic from "serve-static";
 import shopify from "./shopify.js";
 import GDPRWebhookHandlers from "./gdpr.js";
 
-import metaobjectsRetriever from "./metaobjectsRetriever.js";
-import metaobjectsPageCreator from "./metaobjectsPageCreator.js";
+import metaobjectsRetriever from "./utils/metaobjectsRetriever.js";
+import metaobjectsPageCreator from "./utils/metaobjectsPageCreator.js";
+import { metaObjectUpdater } from "./utils/metaObjectUpdater.js";
 import { GetFirstTenSubCategories } from "./queries/GetFirstTenSubCategories.js";
 import { GetFirstTenMacroCategories } from "./queries/GetFirstTenMacroCategories.js";
 import getPages from "./getPages.js";
-import { metaObjectUpdater } from "./metaObjectUpdater.js";
 
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
 

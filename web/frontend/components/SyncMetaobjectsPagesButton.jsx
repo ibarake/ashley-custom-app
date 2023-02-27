@@ -1,39 +1,55 @@
-import React, { useState } from "react";
-import { Button, Toast, Card } from "@shopify/polaris";
+import React from "react";
+import { Button, Card } from "@shopify/polaris";
 import { useAppQuery } from "../hooks";
 
 export const SyncMetaobjectsPagesButton = () => {
-  const [showToast, setShowToast] = useState(false);
-
-  const { data, isLoading: isLoadingTrue } = useAppQuery({
+  const {
+    data,
+    isLoading: isLoadingTrue,
+    refetch,
+    isRefetching: isRefetchingTrue,
+  } = useAppQuery({
     url: "/api/pages/create",
   });
 
-  console.log(data?.msg);
+  console.log(data);
 
-  const handleToastDismiss = () => {
-    setShowToast(false);
+  const HandleSync = () => {
+    refetch();
   };
 
   return (
     <Card>
-      <span>TODO: Are pages synced?</span>
-      {isLoadingTrue ? (
-        <Button loading>Sync Metaobjects Pages</Button>
-      ) : (
-        <Button
-          primary
-          onClick={SyncMetaobjectsPagesButton}
-          style={{ marginLeft: "100px" }}
+      {isLoadingTrue || isRefetchingTrue ? (
+        <div
+          style={{
+            padding: "10px 20px 10px 20px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
         >
-          Sync Metaobjects Pages
-        </Button>
-      )}
-      {showToast && (
-        <Toast
-          content="Metaobjects Pages Synced!"
-          onDismiss={handleToastDismiss}
-        />
+          <span>
+            Pages are <strong>syncing</strong> with all metaobjects
+          </span>
+          <Button loading>Sync Metaobjects Pages</Button>
+        </div>
+      ) : (
+        <div
+          style={{
+            padding: "10px 20px 10px 20px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <span>
+            All pages with the metaobjects <strong>synced</strong>
+          </span>
+          <Button primary onClick={HandleSync}>
+            Sync Metaobjects Pages
+          </Button>
+        </div>
       )}
     </Card>
   );

@@ -1,5 +1,5 @@
 import { GraphqlQueryError } from "@shopify/shopify-api";
-import shopify from "./shopify.js";
+import shopify from "../shopify.js";
 
 export default async function metaobjectsPageCreator(session, meta, template) {
   try {
