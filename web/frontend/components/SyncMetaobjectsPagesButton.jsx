@@ -20,37 +20,32 @@ export const SyncMetaobjectsPagesButton = () => {
 
   return (
     <Card>
-      {isLoadingTrue || isRefetchingTrue ? (
-        <div
-          style={{
-            padding: "10px 20px 10px 20px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <span>
-            Pages are <strong>syncing</strong> with all metaobjects
-          </span>
-          <Button loading>Sync Metaobjects Pages</Button>
-        </div>
-      ) : (
-        <div
-          style={{
-            padding: "10px 20px 10px 20px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <span>
-            All pages with the metaobjects <strong>synced</strong>
-          </span>
-          <Button primary onClick={HandleSync}>
-            Sync Metaobjects Pages
-          </Button>
-        </div>
-      )}
+      <div
+        style={{
+          padding: "10px 20px 10px 20px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        {isLoadingTrue || isRefetchingTrue ? (
+          <>
+            <span>
+              Pages are <strong>syncing</strong> with all metaobjects
+            </span>
+            <Button loading>Sync Metaobjects Pages</Button>
+          </>
+        ) : (
+          <>
+            <span>
+              All pages are <strong>synced</strong> with the metaobjects
+            </span>
+            <Button primary onClick={HandleSync}>
+              Sync Metaobjects Pages
+            </Button>
+          </>
+        )}
+      </div>
     </Card>
   );
 };

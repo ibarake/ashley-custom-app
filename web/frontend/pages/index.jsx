@@ -9,7 +9,7 @@ import {
 
 export default function HomePage() {
   return (
-    <Page narrowWidth>
+    <Page>
       <TitleBar title="Ashley App" primaryAction={null} />
       <Layout>
         <Layout.Section>

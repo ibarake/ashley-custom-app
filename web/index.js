@@ -114,15 +114,9 @@ app.get("/api/pages/create", async (req, res) => {
       .map((e) => e.displayName)
       .concat(subsData.map((e) => e.displayName));
 
-    console.log(metaPages);
-    console.log(metaTitles);
-
     // remaining page that needs to be deleted
     const remaining = metaPages.filter((value) => !metaTitles.includes(value));
     const pageToDeleteObj = pages.find((e) => e.title === remaining[0])?.id;
-
-    console.log(remaining);
-    console.log(pageToDeleteObj);
 
     if (pageToDeleteObj) {
       await shopify.api.rest.Page.delete({
