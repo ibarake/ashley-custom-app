@@ -1,7 +1,6 @@
 import React from "react";
-import { Card, DataTable } from "@shopify/polaris";
+import { Card, DataTable, List, Spinner } from "@shopify/polaris";
 import { useAppQuery } from "../hooks";
-import { List } from "@shopify/polaris";
 
 export const MacroCategories = () => {
   const {
@@ -30,8 +29,6 @@ export const MacroCategories = () => {
   } = useAppQuery({
     url: "/api/metaobjects/collections",
   });
-
-  console.log(collections);
 
   const rows = macrocategories
     ? macrocategories.map((macroCategory) => {
@@ -62,20 +59,21 @@ export const MacroCategories = () => {
               .filter((value) => value !== null)
           : [];
 
-        console.log(subCollections);
-
         const productCount = collections
-          .map((collection) =>
-            subCollections[0]
-              ? subCollections[0].includes(collection.node.id)
-                ? collection.node.productsCount
-                : null
-              : null
-          )
-          .filter((value) => value !== null)
-          .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-
-        console.log(productCount);
+          ? collections
+              .map((collection) =>
+                subCollections[0]
+                  ? subCollections[0].includes(collection.node.id)
+                    ? collection.node.productsCount
+                    : null
+                  : null
+              )
+              .filter((value) => value !== null)
+              .reduce(
+                (accumulator, currentValue) => accumulator + currentValue,
+                0
+              )
+          : 0;
 
         return [
           <strong>{macroCategory.node.id.split("/")[4]}</strong>,
@@ -127,7 +125,15 @@ export const MacroCategories = () => {
     <>
       <Card>
         {isLoadingMacro ? (
-          <p>Loading...</p>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              padding: "20px",
+            }}
+          >
+            <Spinner accessibilityLabel="Spinner example" size="large" />
+          </div>
         ) : (
           <DataTable
             columnContentTypes={["text", "text", "text", "text", "text"]}
