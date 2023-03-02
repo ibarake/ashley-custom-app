@@ -1,5 +1,5 @@
 export const GetFirstTenMacroCategories = `query {
-    metaobjects(type: "macro_categories", first: 10) {
+    metaobjects(type: "macro_categories", first: 100) {
       edges {
         node {
           id

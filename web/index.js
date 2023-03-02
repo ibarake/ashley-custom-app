@@ -7,12 +7,13 @@ import serveStatic from "serve-static";
 import shopify from "./shopify.js";
 import GDPRWebhookHandlers from "./gdpr.js";
 
-import metaobjectsRetriever from "./metaobjectsRetriever.js";
-import metaobjectsPageCreator from "./metaobjectsPageCreator.js";
+import graphqlRetriever from "./utils/metaobjectsRetriever.js";
+import metaobjectsPageCreator from "./utils/metaobjectsPageCreator.js";
+import { metaObjectUpdater } from "./utils/metaObjectUpdater.js";
 import { GetFirstTenSubCategories } from "./queries/GetFirstTenSubCategories.js";
 import { GetFirstTenMacroCategories } from "./queries/GetFirstTenMacroCategories.js";
+import { GetCollections } from "./queries/GetCollections.js";
 import getPages from "./getPages.js";
-import { metaObjectUpdater } from "./metaObjectUpdater.js";
 
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
 
@@ -46,10 +47,7 @@ app.get("/api/metaobjects/subcategories", async (_req, res) => {
   let error = null;
   try {
     const session = res.locals.shopify.session;
-    const response = await metaobjectsRetriever(
-      session,
-      GetFirstTenSubCategories
-    );
+    const response = await graphqlRetriever(session, GetFirstTenSubCategories);
     res.status(status).send(response);
   } catch (e) {
     console.log(`Failed to process: ${e.message}`);
@@ -65,10 +63,26 @@ app.get("/api/metaobjects/macrocategories", async (_req, res) => {
   let error = null;
   try {
     const session = res.locals.shopify.session;
-    const response = await metaobjectsRetriever(
+    const response = await graphqlRetriever(
       session,
       GetFirstTenMacroCategories
     );
+    res.status(status).send(response);
+  } catch (e) {
+    console.log(`Failed to process: ${e.message}`);
+    status = 500;
+    error = e.message;
+
+    res.status(status).send(error);
+  }
+});
+
+app.get("/api/metaobjects/collections", async (_req, res) => {
+  let status = 200;
+  let error = null;
+  try {
+    const session = res.locals.shopify.session;
+    const response = await graphqlRetriever(session, GetCollections);
     res.status(status).send(response);
   } catch (e) {
     console.log(`Failed to process: ${e.message}`);
@@ -86,11 +100,8 @@ app.get("/api/pages/create", async (req, res) => {
   try {
     const session = res.locals.shopify.session;
     const pages = await getPages(session);
-    const macros = await metaobjectsRetriever(
-      session,
-      GetFirstTenMacroCategories
-    );
-    const subs = await metaobjectsRetriever(session, GetFirstTenSubCategories);
+    const macros = await graphqlRetriever(session, GetFirstTenMacroCategories);
+    const subs = await graphqlRetriever(session, GetFirstTenSubCategories);
 
     const subsData = subs.body.data.metaobjects.edges.map((e) => e.node);
     const macroData = macros.body.data.metaobjects.edges.map((e) => e.node);
@@ -114,15 +125,9 @@ app.get("/api/pages/create", async (req, res) => {
       .map((e) => e.displayName)
       .concat(subsData.map((e) => e.displayName));
 
-    console.log(metaPages);
-    console.log(metaTitles);
-
     // remaining page that needs to be deleted
     const remaining = metaPages.filter((value) => !metaTitles.includes(value));
     const pageToDeleteObj = pages.find((e) => e.title === remaining[0])?.id;
-
-    console.log(remaining);
-    console.log(pageToDeleteObj);
 
     if (pageToDeleteObj) {
       await shopify.api.rest.Page.delete({
