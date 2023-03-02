@@ -23,29 +23,60 @@ export const MacroCategories = () => {
     url: "/api/metaobjects/subcategories",
   });
 
-  console.log(macrocategories);
-  console.log(subcategories);
+  const {
+    data: {
+      body: { data: { collections: { edges: collections } = {} } = {} } = {},
+    } = {},
+  } = useAppQuery({
+    url: "/api/metaobjects/collections",
+  });
+
+  console.log(collections);
 
   const rows = macrocategories
     ? macrocategories.map((macroCategory) => {
         const subIds = macroCategory.node.fields[2].value;
-        console.log(subIds);
         const idArray = JSON.parse(subIds);
-        console.log(idArray);
 
         const subTitles = subcategories
           ? subcategories
               .map((subcategory) =>
-                idArray.includes(subcategory.node.id)
-                  ? subcategory.node.displayName
+                idArray
+                  ? idArray.includes(subcategory.node.id)
+                    ? subcategory.node.displayName
+                    : null
                   : null
               )
               .filter((value) => value !== null)
           : [];
 
-        console.log(subTitles);
+        const subCollections = subcategories
+          ? subcategories
+              .map((subcategory) =>
+                idArray
+                  ? idArray.includes(subcategory.node.id)
+                    ? JSON.parse(subcategory.node.fields[2].value)
+                    : null
+                  : null
+              )
+              .filter((value) => value !== null)
+          : [];
 
-        // const titles = idArray.forEach((element) => getMetaobject(element));
+        console.log(subCollections);
+
+        const productCount = collections
+          .map((collection) =>
+            subCollections[0]
+              ? subCollections[0].includes(collection.node.id)
+                ? collection.node.productsCount
+                : null
+              : null
+          )
+          .filter((value) => value !== null)
+          .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+
+        console.log(productCount);
+
         return [
           <strong>{macroCategory.node.id.split("/")[4]}</strong>,
           macroCategory.node.displayName,
@@ -62,8 +93,7 @@ export const MacroCategories = () => {
               textOverflow: "ellipsis",
             }}
           >
-            "TODO: pull product counts from each collection inside this
-            metaobject"
+            {productCount}
           </div>,
           <div
             style={{

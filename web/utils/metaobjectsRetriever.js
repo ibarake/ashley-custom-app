@@ -1,7 +1,7 @@
 import { GraphqlQueryError } from "@shopify/shopify-api";
 import shopify from "../shopify.js";
 
-export default async function metaobjectsRetriever(session, query) {
+export default async function graphqlRetriever(session, query) {
   const client = new shopify.api.clients.Graphql({ session });
 
   try {
